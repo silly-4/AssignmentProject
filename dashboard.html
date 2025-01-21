@@ -137,7 +137,7 @@
         sessionStorage.clear();
         window.location.href= 'index.html';
     }
-    let students = []; // Store student objects
+    let students = []; 
 
     function addToList() {
         const student = {
@@ -168,7 +168,7 @@
         const filterGender = document.getElementById('filterGender').value;
 
         const listContainer = document.querySelector('#list');
-        listContainer.innerHTML = ''; // Clear the existing list
+        listContainer.innerHTML = ''; 
 
         students
             .filter(student => {
@@ -235,8 +235,8 @@
     }
 
     function deleteStudent(index) {
-        students.splice(index, 1); // Remove the student from the array
-        renderStudentList(); // Refresh the displayed list
+        students.splice(index, 1); 
+        renderStudentList(); 
     }
 
     function viewStudent(firstName, lastName, id, dob, gender, nationality) {
