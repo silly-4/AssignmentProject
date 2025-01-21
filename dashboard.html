@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+
+    </style>
+</head>
+<body id="home">
+    <div class="row mb-5">
+        <nav class="navbar navbar-expand-md fixed-top navbar-light" style="background-color: #e3f2fd;">
+            <div class="container-fluid">
+                <a href=""><span id="username"></span></a>
+
+                <form class="d-flex">
+                    <button class="btn btn-outline-secondary" onclick="logout()">Log out</button>
+                </form>
+            </div>
+            </div>
+        </nav>
+    </div>
+
+    <div class="row">
+        <div class="container mt-4">
+            <div class="row mb-3 align-items-center">
+            <div class="col"> </div>
+
+            <div class="col-8">
+                <form class="form-control">
+                    <h2 id="form" class="text-center">FILL THE FORM </h2>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <div class="form-floating ">
+                                <input type="text" class="form-control" id="firstname" placeholder="" required>
+                                <label for="firstname">First Name</label>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-floating"> 
+                                <input type="text" class="form-control" id="lastname" placeholder="" required>
+                                <label for="lastname">Last Name</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="studentId" placeholder="Student ID">
+                                <label for="studentId" class="form-label">Student ID</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label id="genderLabel" for="studentGender" class="form-label">Gender</label>
+                            <select class="form-select" id="studentGender" required>
+                                <option value="" disabled selected>Select gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                    </div>
+                    <div class="mb-2">
+                        <div class="row mb-3">
+                            <label for="studentDob" class="col-md-2 col-form-label">Date of Birth</label>
+                            <div class="col-md-10">
+                            <input type="date" class="form-control" id="studentDob" placeholder="col-form-label">
+                            </div>
+                          </div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="studentNationality" placeholder="Enter nationality" required/>
+                            <label for="studentNationality" class="form-label">Nationality</label>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary mb-2" onclick="addToList()">Add Student</button>
+                </form>
+            </div>
+
+                <div class="col">
+                    
+                </div>
+                
+            </div>
+
+            
+        </div>
+    </div>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <input type="text" id="searchInput" class="form-control w-50" placeholder="Search by name or ID"/>
+            
+            
+            <select id="filterGender" class="form-select w-25" onchange="filterByGender()">
+            <option value="">Filter by Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            </select>
+        </div>
+
+        <div id="list" class="row">
+        </div>
+    </div>
+
+    <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel"><span id="modalStudentName"></span>'s Info</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <strong>
+                    <p id="modalStudentId">ID: </p>
+                    <p id="modalStudentGender">Gender: </p>
+                    <p id="modalStudentDob">Date of Birth: </p>
+                    <p id="modalStudentNationality">Nationality: </p>
+               </strong>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    <script>
+    if (sessionStorage.getItem('isLoginSuccess') != 'true') {
+        window.location.href = "index.html";
+    } else {
+        const username = sessionStorage.getItem('username');
+        document.querySelector("#username").textContent = username;
+    }
+    function logout() {
+        sessionStorage.clear();
+        window.location.href= 'index.html';
+    }
+    let students = []; // Store student objects
+
+    function addToList() {
+        const student = {
+            firstName: document.getElementById('firstname').value,
+            lastName: document.getElementById('lastname').value,
+            id: document.getElementById('studentId').value,
+            gender: document.getElementById('studentGender').value,
+            dob: document.getElementById('studentDob').value,
+            nationality: document.getElementById('studentNationality').value,
+        };
+
+        students.push(student);
+        renderStudentList();
+        clearForm();
+    }
+
+    function clearForm() {
+        document.getElementById('firstname').value = '';
+        document.getElementById('lastname').value = '';
+        document.getElementById('studentId').value = '';
+        document.getElementById('studentGender').value = '';
+        document.getElementById('studentDob').value = '';
+        document.getElementById('studentNationality').value = '';
+    }
+
+    function renderStudentList() {
+        const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+        const filterGender = document.getElementById('filterGender').value;
+
+        const listContainer = document.querySelector('#list');
+        listContainer.innerHTML = ''; // Clear the existing list
+
+        students
+            .filter(student => {
+                const matchesSearch =
+                    student.firstName.toLowerCase().includes(searchQuery) ||
+                    student.lastName.toLowerCase().includes(searchQuery) ||
+                    student.id.toLowerCase().includes(searchQuery);
+
+                const matchesGender = filterGender === '' || student.gender === filterGender;
+
+                return matchesSearch && matchesGender;
+            })
+            .forEach((student, index) => {
+                const studentCard = `
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${student.firstName} ${student.lastName}</h5>
+                                <p><strong>ID:</strong> ${student.id}</p>
+                                <p><strong>Gender:</strong> ${student.gender}</p>
+                                <p><strong>Nationality:</strong> ${student.nationality}</p>
+                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal" onclick="viewStudent('${student.firstName}', '${student.lastName}', '${student.id}', '${student.dob}', '${student.gender}', '${student.nationality}')">View</button>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="editStudent(${index})">Edit</button>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="deleteStudent(${index})">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                listContainer.innerHTML += studentCard;
+            });
+    }
+
+    function editStudent(index) {
+        const student = students[index];
+
+        document.getElementById('firstname').value = student.firstName;
+        document.getElementById('lastname').value = student.lastName;
+        document.getElementById('studentId').value = student.id;
+        document.getElementById('studentGender').value = student.gender;
+        document.getElementById('studentDob').value = student.dob;
+        document.getElementById('studentNationality').value = student.nationality;
+
+        const addButton = document.querySelector('button[onclick="addToList()"]');
+        addButton.textContent = "Update Student";
+        addButton.setAttribute("onclick", `updateStudent(${index})`);
+    }
+
+    function updateStudent(index) {
+        students[index] = {
+            firstName: document.getElementById('firstname').value,
+            lastName: document.getElementById('lastname').value,
+            id: document.getElementById('studentId').value,
+            gender: document.getElementById('studentGender').value,
+            dob: document.getElementById('studentDob').value,
+            nationality: document.getElementById('studentNationality').value,
+        };
+
+        const addButton = document.querySelector('button[onclick^="updateStudent"]');
+        addButton.textContent = "Add Student";
+        addButton.setAttribute("onclick", "addToList()");
+
+        renderStudentList();
+        clearForm();
+    }
+
+    function deleteStudent(index) {
+        students.splice(index, 1); // Remove the student from the array
+        renderStudentList(); // Refresh the displayed list
+    }
+
+    function viewStudent(firstName, lastName, id, dob, gender, nationality) {
+        document.querySelector('#modalStudentName').textContent = firstName + ' ' + lastName;
+        document.querySelector("#modalStudentId").textContent = `ID: ${id}`;
+        document.querySelector("#modalStudentDob").textContent = `Date of Birth: ${dob}`;
+        document.querySelector("#modalStudentGender").textContent = `Gender: ${gender}`;
+        document.querySelector("#modalStudentNationality").textContent = `Nationality: ${nationality}`;
+    }
+
+    // Attach search and filter handlers
+    document.getElementById('searchInput').oninput = renderStudentList;
+    document.getElementById('filterGender').onchange = renderStudentList;
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
